@@ -1,6 +1,6 @@
 ---
-title: "Multiple Data Frame Operations"
-author: "R package build"
+title: Multiple Data Frame Operations
+author: R package build
 date: '2022-02-15'
 slug: multiple-data-frame-operations
 categories: []
