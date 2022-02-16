@@ -1,0 +1,125 @@
+---
+title: "Multiple Data Frame Operations"
+author: "R package build"
+date: '2022-02-15'
+slug: multiple-data-frame-operations
+categories: []
+tags: []
+---
+
+## Call Libraries
+```{r}
+library(tidyverse)
+```
+
+## Women in Science
+### Import Files from GitHub
+```{r}
+url <- 'https://github.com/Lior1430/tidyverse/raw/main/professions.csv'
+professions <- read_csv(url)
+names(professions)
+```
+```{r}
+url2 <- 'https://github.com/Lior1430/tidyverse/raw/main/dates.csv'
+dates <- read_csv(url2)
+names(dates)
+```
+```{r}
+url3 <- 'https://github.com/Lior1430/tidyverse/raw/main/works.csv'
+works <- read_csv(url3)
+names(works)
+```
+
+### Joining Data Frames
+```{r}
+professions %>% 
+  left_join(dates)
+```
+```{r}
+professions %>%
+  right_join(dates)
+```
+```{r}
+dates %>%
+  full_join(works)
+```
+```{r}
+dates %>%
+  inner_join(works)
+```
+```{r}
+dates %>%
+  semi_join(works)
+```
+```{r}
+dates %>%
+  anti_join(works)
+```
+```{r}
+professions %>% 
+  left_join(dates) %>%
+  left_join(works)
+```
+
+## Student Records
+### Import Files from GitHub
+```{r}
+url4 <- 'https://github.com/Lior1430/tidyverse/raw/main/enrolment.csv'
+enrolment <- read_csv(url4)
+names(enrolment)
+```
+```{r}
+url5 <- 'https://github.com/Lior1430/tidyverse/raw/main/survey.csv'
+survey <- read_csv(url5)
+names(survey)
+```
+
+### In class
+```{r}
+enrolment %>% 
+  left_join(survey, by = "id")
+```
+### Survey missing
+```{r}
+enrolment %>%
+  anti_join(survey, by = "id")
+```
+### Dropped
+```{r}
+survey %>% 
+  anti_join(enrolment, by = "id")
+```
+
+## Grocery Sales
+### Import Files from GitHub
+```{r}
+url6 <- 'https://github.com/Lior1430/tidyverse/raw/main/purchases.csv'
+purchases <- read_csv(url6)
+names(purchases)
+```
+```{r}
+url7 <- 'https://github.com/Lior1430/tidyverse/raw/main/prices.csv'
+prices <- read_csv(url7)
+names(prices)
+```
+
+```{r}
+purchases %>% 
+  left_join(prices)
+```
+
+### Total revenue
+```{r}
+purchases %>%
+  left_join(prices) %>%
+  summarise(total_revenue = sum(price))
+```
+
+### Revenue per customer
+```{r}
+purchases %>%
+  left_join(prices) %>%
+  group_by(customer_id) %>%
+  summarise(total_revenue = sum(price))
+```
+
