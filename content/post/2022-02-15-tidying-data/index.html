@@ -1,0 +1,173 @@
+---
+title: "Tidying Data"
+author: "R package build"
+date: '2022-02-15'
+slug: tidying-data
+categories: []
+tags: []
+---
+
+<script src="{{< blogdown/postref >}}index_files/header-attrs/header-attrs.js"></script>
+
+
+<div id="call-libraries" class="section level2">
+<h2>Call Libraries</h2>
+<pre class="r"><code>library(tidyverse)</code></pre>
+<pre><code>## ── Attaching packages ─────────────────────────────────────── tidyverse 1.3.1 ──</code></pre>
+<pre><code>## ✓ ggplot2 3.3.5     ✓ purrr   0.3.4
+## ✓ tibble  3.1.6     ✓ dplyr   1.0.7
+## ✓ tidyr   1.2.0     ✓ stringr 1.4.0
+## ✓ readr   2.1.2     ✓ forcats 0.5.1</code></pre>
+<pre><code>## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+## x dplyr::filter() masks stats::filter()
+## x dplyr::lag()    masks stats::lag()</code></pre>
+</div>
+<div id="sales" class="section level2">
+<h2>Sales</h2>
+<div id="import-files-from-github" class="section level3">
+<h3>Import Files from GitHub</h3>
+<pre class="r"><code>url &lt;- &#39;https://github.com/Lior1430/tidyverse/raw/main/purchases.csv&#39;
+customers &lt;- read_csv(url)</code></pre>
+<pre><code>## Rows: 2 Columns: 4
+## ── Column specification ────────────────────────────────────────────────────────
+## Delimiter: &quot;,&quot;
+## chr (3): item_1, item_2, item_3
+## dbl (1): customer_id
+## 
+## ℹ Use `spec()` to retrieve the full column specification for this data.
+## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+<pre class="r"><code>names(customers)</code></pre>
+<pre><code>## [1] &quot;customer_id&quot; &quot;item_1&quot;      &quot;item_2&quot;      &quot;item_3&quot;</code></pre>
+<pre class="r"><code>url2 &lt;- &#39;https://github.com/Lior1430/tidyverse/raw/main/prices.csv&#39;
+prices &lt;- read_csv(url2)</code></pre>
+<pre><code>## Rows: 5 Columns: 2
+## ── Column specification ────────────────────────────────────────────────────────
+## Delimiter: &quot;,&quot;
+## chr (1): item
+## dbl (1): price
+## 
+## ℹ Use `spec()` to retrieve the full column specification for this data.
+## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+<pre class="r"><code>names(prices)</code></pre>
+<pre><code>## [1] &quot;item&quot;  &quot;price&quot;</code></pre>
+</div>
+</div>
+<div id="pivoting-data" class="section level2">
+<h2>Pivoting Data</h2>
+<div id="making-it-longer-more-rows" class="section level3">
+<h3>Making it longer (more rows)</h3>
+<pre class="r"><code>purchases &lt;- customers %&gt;%
+  pivot_longer(cols = item_1:item_3, names_to = &quot;item_no&quot;, values_to = &quot;item&quot;)
+purchases</code></pre>
+<pre><code>## # A tibble: 6 × 3
+##   customer_id item_no item        
+##         &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;       
+## 1           1 item_1  bread       
+## 2           1 item_2  milk        
+## 3           1 item_3  banana      
+## 4           2 item_1  milk        
+## 5           2 item_2  toilet paper
+## 6           2 item_3  &lt;NA&gt;</code></pre>
+<pre class="r"><code>purchases %&gt;% 
+  left_join(prices)</code></pre>
+<pre><code>## Joining, by = &quot;item&quot;</code></pre>
+<pre><code>## # A tibble: 6 × 4
+##   customer_id item_no item         price
+##         &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;        &lt;dbl&gt;
+## 1           1 item_1  bread         1   
+## 2           1 item_2  milk          0.8 
+## 3           1 item_3  banana        0.15
+## 4           2 item_1  milk          0.8 
+## 5           2 item_2  toilet paper  3   
+## 6           2 item_3  &lt;NA&gt;         NA</code></pre>
+</div>
+<div id="making-it-wider-more-columns" class="section level3">
+<h3>Making it wider (more columns)</h3>
+<pre class="r"><code>purchases %&gt;% 
+  pivot_wider(
+    names_from = item_no,
+    values_from = item
+  )</code></pre>
+<pre><code>## # A tibble: 2 × 4
+##   customer_id item_1 item_2       item_3
+##         &lt;dbl&gt; &lt;chr&gt;  &lt;chr&gt;        &lt;chr&gt; 
+## 1           1 bread  milk         banana
+## 2           2 milk   toilet paper &lt;NA&gt;</code></pre>
+</div>
+</div>
+<div id="approval-rating-of-donald-trump" class="section level2">
+<h2>Approval Rating of Donald Trump</h2>
+<div id="import-files-from-github-1" class="section level3">
+<h3>Import Files from GitHub</h3>
+<pre class="r"><code>url3 &lt;- &#39;https://github.com/Lior1430/tidyverse/raw/main/approval_topline.csv&#39;
+trump &lt;- read_csv(url3)</code></pre>
+<pre><code>## Rows: 4053 Columns: 10
+## ── Column specification ────────────────────────────────────────────────────────
+## Delimiter: &quot;,&quot;
+## chr (4): president, subgroup, modeldate, timestamp
+## dbl (6): approve_estimate, approve_hi, approve_lo, disapprove_estimate, disa...
+## 
+## ℹ Use `spec()` to retrieve the full column specification for this data.
+## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+<pre class="r"><code>names(trump)</code></pre>
+<pre><code>##  [1] &quot;president&quot;           &quot;subgroup&quot;            &quot;modeldate&quot;          
+##  [4] &quot;approve_estimate&quot;    &quot;approve_hi&quot;          &quot;approve_lo&quot;         
+##  [7] &quot;disapprove_estimate&quot; &quot;disapprove_hi&quot;       &quot;disapprove_lo&quot;      
+## [10] &quot;timestamp&quot;</code></pre>
+</div>
+<div id="pivot-the-data" class="section level3">
+<h3>Pivot the data</h3>
+<pre class="r"><code>trump_longer &lt;- trump %&gt;%
+  pivot_longer(
+    cols = c(approve_estimate, disapprove_estimate),
+    names_to = &quot;rating_type&quot;,
+    values_to = &quot;rating_value&quot;
+  )
+trump_longer</code></pre>
+<pre><code>## # A tibble: 8,106 × 10
+##    president    subgroup  modeldate  approve_hi approve_lo disapprove_hi
+##    &lt;chr&gt;        &lt;chr&gt;     &lt;chr&gt;           &lt;dbl&gt;      &lt;dbl&gt;         &lt;dbl&gt;
+##  1 Donald Trump Voters    10/04/2020       49.1       40.2          56.8
+##  2 Donald Trump Voters    10/04/2020       49.1       40.2          56.8
+##  3 Donald Trump Adults    10/04/2020       47.3       39.1          57.2
+##  4 Donald Trump Adults    10/04/2020       47.3       39.1          57.2
+##  5 Donald Trump All polls 10/04/2020       48.6       39.8          56.6
+##  6 Donald Trump All polls 10/04/2020       48.6       39.8          56.6
+##  7 Donald Trump All polls 10/03/2020       48.9       39.9          56.3
+##  8 Donald Trump All polls 10/03/2020       48.9       39.9          56.3
+##  9 Donald Trump Adults    10/03/2020       47.3       39.1          57.2
+## 10 Donald Trump Adults    10/03/2020       47.3       39.1          57.2
+## # … with 8,096 more rows, and 4 more variables: disapprove_lo &lt;dbl&gt;,
+## #   timestamp &lt;chr&gt;, rating_type &lt;chr&gt;, rating_value &lt;dbl&gt;</code></pre>
+</div>
+<div id="plot-the-data" class="section level3">
+<h3>Plot the data</h3>
+<pre class="r"><code>ggplot(trump_longer, aes(modeldate, rating_value, color = rating_type, group = rating_type)) +
+  geom_line() +
+  facet_wrap(~ subgroup) +
+  scale_color_manual(values = c(&quot;darkgreen&quot;, &quot;orange&quot;)) +
+  labs(
+    x = &quot;Date&quot;, y = &quot;Rating&quot;, 
+    color = NULL,
+    title = &quot;How (un)popular is Donald Trump?&quot;,
+    subtitle = &quot;Estimates based on polls of all adults and polls of likely/registered voters&quot;,
+    caption = &quot;Source: FiveThirtyEight modeling estimates&quot;
+  )</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-9-1.png" width="672" />
+### Change legend position and theme</p>
+<pre class="r"><code>ggplot(trump_longer, aes(modeldate, rating_value, color = rating_type, group = rating_type)) +
+  geom_line() +
+  facet_wrap(~ subgroup) +
+  scale_color_manual(values = c(&quot;darkgreen&quot;, &quot;orange&quot;)) +
+  labs(
+    x = &quot;Date&quot;, y = &quot;Rating&quot;, 
+    color = NULL,
+    title = &quot;How (un)popular is Donald Trump?&quot;,
+    subtitle = &quot;Estimates based on polls of all adults and polls of likely/registered voters&quot;,
+    caption = &quot;Source: FiveThirtyEight modeling estimates&quot;
+  ) +
+  theme_minimal() +
+  theme(legend.position = &quot;bottom&quot;)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+</div>
+</div>

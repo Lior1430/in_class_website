@@ -1,0 +1,99 @@
+---
+title: "Tidying Data"
+author: "R package build"
+date: '2022-02-15'
+slug: tidying-data
+categories: []
+tags: []
+---
+
+## Call Libraries
+```{r}
+library(tidyverse)
+```
+
+## Sales
+### Import Files from GitHub
+```{r}
+url <- 'https://github.com/Lior1430/tidyverse/raw/main/purchases.csv'
+customers <- read_csv(url)
+names(customers)
+```
+```{r}
+url2 <- 'https://github.com/Lior1430/tidyverse/raw/main/prices.csv'
+prices <- read_csv(url2)
+names(prices)
+```
+
+## Pivoting Data
+### Making it longer (more rows)
+```{r}
+purchases <- customers %>%
+  pivot_longer(cols = item_1:item_3, names_to = "item_no", values_to = "item")
+purchases
+```
+
+```{r}
+purchases %>% 
+  left_join(prices)
+```
+
+### Making it wider (more columns)
+```{r}
+purchases %>% 
+  pivot_wider(
+    names_from = item_no,
+    values_from = item
+  )
+```
+
+## Approval Rating of Donald Trump
+### Import Files from GitHub
+```{r}
+url3 <- 'https://github.com/Lior1430/tidyverse/raw/main/approval_topline.csv'
+trump <- read_csv(url3)
+names(trump)
+```
+
+### Pivot the data
+```{r}
+trump_longer <- trump %>%
+  pivot_longer(
+    cols = c(approve_estimate, disapprove_estimate),
+    names_to = "rating_type",
+    values_to = "rating_value"
+  )
+trump_longer
+```
+
+### Plot the data
+```{r}
+ggplot(trump_longer, aes(modeldate, rating_value, color = rating_type, group = rating_type)) +
+  geom_line() +
+  facet_wrap(~ subgroup) +
+  scale_color_manual(values = c("darkgreen", "orange")) +
+  labs(
+    x = "Date", y = "Rating", 
+    color = NULL,
+    title = "How (un)popular is Donald Trump?",
+    subtitle = "Estimates based on polls of all adults and polls of likely/registered voters",
+    caption = "Source: FiveThirtyEight modeling estimates"
+  )
+```
+### Change legend position and theme
+```{r}
+ggplot(trump_longer, aes(modeldate, rating_value, color = rating_type, group = rating_type)) +
+  geom_line() +
+  facet_wrap(~ subgroup) +
+  scale_color_manual(values = c("darkgreen", "orange")) +
+  labs(
+    x = "Date", y = "Rating", 
+    color = NULL,
+    title = "How (un)popular is Donald Trump?",
+    subtitle = "Estimates based on polls of all adults and polls of likely/registered voters",
+    caption = "Source: FiveThirtyEight modeling estimates"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+```
+
