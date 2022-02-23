@@ -1,0 +1,166 @@
+---
+title: "Data Classes"
+author: "R package build"
+date: '2022-02-23'
+slug: data-classes
+categories: []
+tags: []
+---
+
+# Data Classes
+
+```{r}
+library(tidyverse)
+```
+
+## Factors
+```{r}
+x <- factor(c("BS", "MS", "PhD", "MS"))
+x
+```
+```{r}
+typeof(x)
+
+class(x)
+```
+
+### Factors Have Level Labels and Level Numbers
+```{r}
+glimpse(x)
+```
+
+```{r}
+as.integer(x)
+```
+
+## Dates
+```{r}
+y <- as.Date("2022-02-23")
+y
+```
+```{r}
+typeof(y)
+
+class(y)
+```
+
+### Dates Are Two Integers Glued Together
+```{r}
+#number of days since the origin and the origin (1 Jan 1970)
+as.integer(y)
+```
+
+#### Calculate How Many Years
+```{r}
+as.integer(y) / 365
+```
+
+## Data Frames
+```{r}
+df <- data.frame(x = 1:2, y = 3:4)
+df
+```
+```{r}
+typeof(df)
+
+class(df)
+```
+
+### Lists
+```{r}
+l <- list(
+  x = 1:4,
+  y = c("hi", "hello", "jello"),
+  z = c(TRUE, FALSE)
+)
+l
+```
+
+### Extract a Vector from a Data Frame
+```{r}
+df %>%
+  pull(y)
+```
+
+# Working with Factors
+
+## Call Libraries
+```{r}
+library(tidyverse)
+catlovers <- "https://raw.githubusercontent.com/Lior1430/tidyverse/main/cat-lovers.csv"
+
+cat_lovers <- read_csv(catlovers)
+```
+
+## Read Data
+```{r}
+glimpse(cat_lovers)
+```
+
+## Plot the Data
+```{r}
+ggplot(cat_lovers, mapping = aes(x = handedness)) +
+  geom_bar()
+```
+
+### Change Factors
+```{r}
+cat_lovers %>%
+  mutate(handedness = fct_infreq(handedness)) %>%
+  ggplot(mapping = aes(x = handedness)) +
+  geom_bar()
+```
+
+# Working with Dates
+
+## Call Libraries
+```{r}
+library(tidyverse)
+library(lubridate)
+hotel <- "https://raw.githubusercontent.com/Lior1430/tidyverse/main/hotels.csv"
+
+hotels <- read_csv(hotel)
+```
+
+## Calculate and Visualize Number of Bookings on any Arrival Date
+```{r}
+hotels %>%
+  select(starts_with("arrival_"))
+```
+
+### Step 1: Construct Dates
+```{r}
+library(glue)
+
+hotels %>%
+  mutate(
+    arrival_date = ymd(glue("{arrival_date_year} {arrival_date_month} {arrival_date_day_of_month}"))
+    ) %>% 
+  relocate(arrival_date)
+```
+
+### Step 2: Count Bookings per Date
+```{r}
+hotels %>%
+  mutate(arrival_date = ymd(glue("{arrival_date_year} {arrival_date_month} {arrival_date_day_of_month}"))) %>% 
+  count(arrival_date)
+```
+
+### Visualize Bookings per Date
+```{r}
+hotels %>%
+  mutate(arrival_date = ymd(glue("{arrival_date_year} {arrival_date_month} {arrival_date_day_of_month}"))) %>% 
+  count(arrival_date) %>%
+  ggplot(aes(x = arrival_date, y = n, group = 1)) +
+  geom_line()
+```
+
+#### Visualize Using a Smooth Curve
+```{r}
+hotels %>%
+  mutate(arrival_date = ymd(glue("{arrival_date_year} {arrival_date_month} {arrival_date_day_of_month}"))) %>% 
+  count(arrival_date) %>%
+  ggplot(aes(x = arrival_date, y = n, group = 1)) +
+  geom_smooth()
+```
+
