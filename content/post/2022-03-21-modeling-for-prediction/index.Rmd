@@ -1,0 +1,185 @@
+---
+title: "Modeling for Prediction"
+author: "R package build"
+date: '2022-03-21'
+slug: modeling-for-prediction
+categories: []
+tags: []
+---
+
+# Questions
+## **What are the advantages and disadvantages of k-fold cross validation relative to the Single Split Validation approach?**
+
+    The single split validation approach only allows for one subset to     fit the model which could lead to an overestimation. K-fold           validation relieves this bias. 
+
+## **What are the advantages and disadvantages of k-fold cross validation relative to LOOCV?**
+
+    LOOCV is unbiased compared to k-fold cross validation because it      uses more of the dataset set. Although it is not biased, it has a     higher variance.
+
+## **What are the pros and cons of Bootstrapping?**
+### Pros:
+      Easy way to estimate confidence intervals
+      Easy way to estimate standard errors
+      Low cost
+
+### Cons:
+      Undervalues extreme values
+      Provides info only about original data set
+      Does not correct biases
+
+# Import Data
+```{r}
+library(readr)
+```
+
+```{r}
+realestate <- read_csv("https://github.com/Lior1430/Real-Estate-Evaluation/raw/main/Real%20estate%20valuation%20data%20set.csv")
+```
+
+# Setup
+```{r}
+library(ISLR)
+library(boot)
+```
+
+# Cross Validation of housing_median_age and median_house_value
+```{r}
+set.seed(1)
+head(realestate)
+dim(realestate)
+train_re <- sample(350, 8)
+head(train_re)
+```
+```{r}
+attach(realestate)
+lm.fit <- lm(`Y house price of unit area` ~ `X2 house age`, data = realestate, subset = train_re)
+lm.fit
+```
+```{r}
+mean((`Y house price of unit area` - predict(lm.fit, realestate))[-train_re]^2)
+```
+```{r}
+plot(`Y house price of unit area`, `X2 house age`)
+```
+```{r}
+lm.fit.poly <- lm(`Y house price of unit area`~poly(`X2 house age`, 2), data = realestate, subset = train_re)
+lm.fit.poly
+```
+```{r}
+mean((`Y house price of unit area` - predict(lm.fit.poly, realestate))[-train_re]^2)
+```
+
+```{r}
+n = 2 
+set.seed(n)
+train_re <- sample(350, 8)
+attach(realestate)
+lm.fit <- lm(`Y house price of unit area`~ `X2 house age`, data = realestate, subset = train_re)
+lm.fit.poly <- lm(`Y house price of unit area`~poly(`X2 house age`, 2), data = realestate, subset = train_re)
+lm.fit.poly
+```
+
+
+# K-cross Validation 
+## K = 10 for for Y house price of unit area and X2 house age
+```{r}
+K = 10
+cv.error.10 <- rep(0, 5)
+degree <- 1:5
+for(d in degree){
+  glm.fit <- glm(`Y house price of unit area`~poly(`X2 house age`, d), data = realestate)
+  cv.error.10[d] <- cv.glm(realestate, glm.fit, K = K)$delta[1]
+}
+cv.error.10
+```
+```{r}
+plot(degree, cv.error.10, type = "b")
+```
+## K = 100 for for Y house price of unit area and X2 house age
+```{r}
+K = 100
+cv.error.100 <- rep(0, 5)
+degree <- 1:5
+for(d in degree){
+  glm.fit <- glm(`Y house price of unit area`~poly(`X2 house age`, d), data = realestate)
+  cv.error.100[d] <- cv.glm(realestate, glm.fit, K = K)$delta[1]
+}
+cv.error.100
+```
+```{r}
+plot(degree, cv.error.100, type = "b")
+```
+## K = 10 for for Y house price of unit area and X4 number of convenience stores
+```{r}
+K = 10
+cv.error.10 <- rep(0, 5)
+degree <- 1:5
+for(d in degree){
+  glm.fit <- glm(`Y house price of unit area`~poly(`X4 number of convenience stores`, d), data = realestate)
+  cv.error.10[d] <- cv.glm(realestate, glm.fit, K = K)$delta[1]
+}
+cv.error.10
+```
+```{r}
+plot(degree, cv.error.10, type = "b")
+```
+## K = 100 for Y house price of unit area and X4 number of convenience stores
+```{r}
+K = 100
+cv.error.100 <- rep(0, 5)
+degree <- 1:5
+for(d in degree){
+  glm.fit <- glm(`Y house price of unit area`~poly(`X4 number of convenience stores`, d), data = realestate)
+  cv.error.100[d] <- cv.glm(realestate, glm.fit, K = K)$delta[1]
+}
+cv.error.100
+```
+```{r}
+plot(degree, cv.error.100, type = "b")
+```
+
+# Bootsrap Validation 
+## Y house price of unit area and X2 house age
+```{r}
+boot.fn <- function(realestate, index){
+  return(coef(lm(`Y house price of unit area`~`X2 house age`, data = realestate, subset = index)))
+}
+```
+```{r}
+boot.fn(realestate, 1:350)
+```
+```{r}
+set.seed(1)
+boot.fn(realestate, sample(350, 350, replace = T))
+```
+```{r}
+boot.out1 <- boot(realestate, boot.fn, 500)
+plot(boot.out1)
+```
+```{r}
+boot.out1.2 <- boot(realestate, boot.fn, 1000)
+plot(boot.out1.2)
+```
+
+## Y house price of unit area and X4 number of convenience stores
+```{r}
+boot.fn <- function(realestate, index){
+  return(coef(lm(`Y house price of unit area`~`X4 number of convenience stores`, data = realestate, subset = index)))
+}
+```
+```{r}
+boot.fn(realestate, 1:350)
+```
+```{r}
+set.seed(1)
+boot.fn(realestate, sample(350, 350, replace = T))
+```
+```{r}
+boot.out2 <- boot(realestate, boot.fn, 500)
+plot(boot.out2)
+```
+```{r}
+boot.out2 <- boot(realestate, boot.fn, 1000)
+plot(boot.out2)
+```
+
